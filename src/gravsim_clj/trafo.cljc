@@ -37,5 +37,9 @@
   (let [dv (sub v1 v2)]
     (norm dv)))
 
+(defn v-mandist [v1 v2]
+  (let [dv (sub v1 v2)]
+    (apply + (mapv #(Math/abs %) dv))))
+
 (defn midpoint [v1 v2]
   (scalar 0.5 (add v1 v2)))

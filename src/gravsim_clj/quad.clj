@@ -7,6 +7,9 @@
 (def WIDTH 2)
 (def HEIGHT 3)
 
+(def TREECUTOFF 5)
+(def THRESHOLD 1.5)
+
 (defn half-width [rect] (* 0.5 (get rect WIDTH)))
 (defn half-height [rect] (* 0.5 (get rect HEIGHT)))
 
@@ -19,49 +22,46 @@
 (defn slice [rect [center-x center-y] direction]
   (let [height (half-width rect)
         width (half-height rect)]
-    (case direction :nw [(get rect X) (get rect Y) height width]
-                    :ne [center-x (get rect Y) height width]
-                    :sw [(get rect X) center-y height width]
-                    :se [center-x center-y height width])))
+    (case direction 0 [(get rect X) (get rect Y) height width]
+                    1 [center-x (get rect Y) height width]
+                    2 [(get rect X) center-y height width]
+                    3 [center-x center-y height width])))
 
-(defn determine-quad [[x y] [center-x center-y]]
-  (let [west? (< x center-x)
-        north? (< y center-y)]
-    (cond (and west? north?) :nw
-          (and (not west?) (not north?)) :se
-          west? :sw
-          north? :ne)))
+(defn group-by-quad [[center-x center-y] bodies]
+  (loop [remaining bodies
+         nw [] ne [] sw [] se []]
+    (if (empty? remaining) [nw ne sw se]
+                           (let [body (first remaining)
+                                 west? (< (get (:pos body) X) center-x)
+                                 north? (< (get (:pos body) Y) center-y)]
+                             (cond (and west? north?) (recur (rest remaining) (conj nw body) ne sw se)
+                                   (and (not west?) (not north?)) (recur (rest remaining) nw ne sw (conj se body))
+                                   west? (recur (rest remaining) nw ne (conj sw body) se)
+                                   north? (recur (rest remaining) nw (conj ne body) sw se))))))
 
 (defn quadtree-node [rect bodies]
   (let [mass (apply + (map #(:mass %) bodies))
         center (center rect)
-        num (count bodies)]
+        num (count bodies)
+        density (/ mass (area rect))
+        node {:rect    rect
+              :pos     center
+              :mass    mass
+              :density density}]
 
-    (cond (zero? num) nil
-          (= num 1) {:rect   rect
-                     :pos    center
-                     :mass   mass
-                     :density (/ mass (area rect))
-                     :bodies bodies}
-
-          true (let [grouped (group-by #(determine-quad (:pos %) center) bodies)
-                     children (filter some?
-                                      (map (fn [dir] (quadtree-node (slice rect center dir)
-                                                                    (dir grouped)))
-                                           [:nw :ne :sw :se]))]
-                 {:rect     rect
-                  :pos      center
-                  :mass     mass
-                  :density (/ mass (area rect))
-                  :children children}))))
-
-(def THRESHOLD 1)
+    (if (<= num TREECUTOFF) (-> node
+                                (assoc :bodies bodies)
+                                (assoc :leaf true))
+                            (let [grouped (group-by-quad center bodies)
+                                  children (map (fn [dir group] (quadtree-node (slice rect center dir) group))
+                                                [0 1 2 3] grouped)]
+                              (-> node
+                                  (assoc :children children)
+                                  (assoc :leaf false))))))
 
 (defn get-clustered [pos node]
-  (let [dist-par (/ (get (:rect node) WIDTH) (+ 1e-10 (t/v-dist pos (:pos node))))
-        far-node? (< dist-par THRESHOLD)
-        children (:children node)
-        has-children? (seq children)]
+  (let [dist-par (/ (get (:rect node) WIDTH) (t/v-dist pos (:pos node)))
+        far-node? (< dist-par THRESHOLD)]
     (cond far-node? (select-keys node [:pos :mass])
-          has-children? (flatten (map #(get-clustered pos %) children))
+          (:leaf node) (flatten (map #(get-clustered pos %) (:children node)))
           true (:bodies node))))
