@@ -1,4 +1,4 @@
-(ns gravsim_clj.rand)
+(ns gravsim.rand)
 
 (declare rand-n)
 

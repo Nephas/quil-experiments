@@ -1,5 +1,5 @@
-(ns gravsim_clj.quad
-  (:require [gravsim_clj.trafo :as t]))
+(ns gravsim.quad
+  (:require [gravsim.trafo :as t]))
 
 (def X 0)
 (def Y 1)

@@ -1,6 +1,6 @@
-(ns gravsim_clj.physics
-  (:require [gravsim_clj.trafo :as t]
-            [gravsim_clj.quad :as quad]))
+(ns gravsim.physics
+  (:require [gravsim.trafo :as t]
+            [gravsim.quad :as quad]))
 
 
 (def G "AU3/Msol'd2" 2.976235E-4)

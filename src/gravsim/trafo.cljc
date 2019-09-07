@@ -1,4 +1,4 @@
-(ns gravsim_clj.trafo)
+(ns gravsim.trafo)
 
 (defprotocol Distance
   (dist [this other] "Euclidian distance between two similar objects"))
