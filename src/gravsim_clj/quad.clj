@@ -14,73 +14,54 @@
   [(+ (get rect X) (half-width rect))
    (+ (get rect Y) (half-height rect))])
 
-(defn slice-nw [rect]
-  [(get rect X)
-   (get rect Y)
-   (half-width rect)
-   (half-height rect)])
+(defn area [rect] (* (get rect WIDTH) (get rect HEIGHT)))
 
-(defn slice-ne [rect]
-  [(+ (get rect X) (half-width rect))
-   (get rect Y)
-   (half-width rect)
-   (half-height rect)])
+(defn slice [rect [center-x center-y] direction]
+  (let [height (half-width rect)
+        width (half-height rect)]
+    (case direction :nw [(get rect X) (get rect Y) height width]
+                    :ne [center-x (get rect Y) height width]
+                    :sw [(get rect X) center-y height width]
+                    :se [center-x center-y height width])))
 
-(defn slice-sw [rect]
-  [(get rect X)
-   (+ (get rect Y) (half-height rect))
-   (half-width rect)
-   (half-height rect)])
-
-(defn slice-se [rect]
-  [(+ (get rect X) (half-width rect))
-   (+ (get rect Y) (half-height rect))
-   (half-width rect)
-   (half-height rect)])
-
-(defn rect-contains [rect pos]
-  (let [xmax (+ (get rect X) (get rect WIDTH))
-        ymax (+ (get rect Y) (get rect HEIGHT))]
-    (and (< (get rect X) (get pos X) xmax) (< (get rect Y) (get pos Y) ymax))))
+(defn determine-quad [[x y] [center-x center-y]]
+  (let [west? (< x center-x)
+        north? (< y center-y)]
+    (cond (and west? north?) :nw
+          (and (not west?) (not north?)) :se
+          west? :sw
+          north? :ne)))
 
 (defn quadtree-node [rect bodies]
-  (let [contained-bodies (filter (fn [body] (rect-contains rect (:pos body))) bodies)
-        mass (apply + (map #(:mass %) contained-bodies))
-        num (count contained-bodies)]
+  (let [mass (apply + (map #(:mass %) bodies))
+        center (center rect)
+        num (count bodies)]
 
-    (case num 0 nil
-              1 {:rect rect
-                 :pos  (center rect)
-                 :mass mass
-                 :body (first contained-bodies)}
+    (cond (zero? num) nil
+          (= num 1) {:rect   rect
+                     :pos    center
+                     :mass   mass
+                     :density (/ mass (area rect))
+                     :bodies bodies}
 
-              {:rect     rect
-               :pos      (center rect)
-               :mass     mass
-
-               :child-nw (quadtree-node (slice-nw rect) contained-bodies)
-               :child-ne (quadtree-node (slice-ne rect) contained-bodies)
-               :child-sw (quadtree-node (slice-sw rect) contained-bodies)
-               :child-se (quadtree-node (slice-se rect) contained-bodies)})))
-
-(defn get-children [node]
-  (filter some? [(:child-ne node)
-                 (:child-nw node)
-                 (:child-se node)
-                 (:child-sw node)]))
-
-(defn has-children [node]
-  (seq (get-children node)))
+          true (let [grouped (group-by #(determine-quad (:pos %) center) bodies)
+                     children (filter some?
+                                      (map (fn [dir] (quadtree-node (slice rect center dir)
+                                                                    (dir grouped)))
+                                           [:nw :ne :sw :se]))]
+                 {:rect     rect
+                  :pos      center
+                  :mass     mass
+                  :density (/ mass (area rect))
+                  :children children}))))
 
 (def THRESHOLD 1)
 
 (defn get-clustered [pos node]
   (let [dist-par (/ (get (:rect node) WIDTH) (+ 1e-10 (t/v-dist pos (:pos node))))
         far-node? (< dist-par THRESHOLD)
-        children (get-children node)
+        children (:children node)
         has-children? (seq children)]
-    (if far-node?
-      (select-keys node [:pos :mass])
-      (if has-children?
-        (flatten (map #(get-clustered pos %) children))
-        (select-keys (:body node) [:pos :mass])))))
+    (cond far-node? (select-keys node [:pos :mass])
+          has-children? (flatten (map #(get-clustered pos %) children))
+          true (:bodies node))))
