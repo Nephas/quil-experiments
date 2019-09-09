@@ -25,12 +25,11 @@
         actual-tree (q/quadtree-node rect bodies)
         clustered-tree (flatten (q/get-clustered [9 4] actual-tree))]
     (testing "tree construction"
-      (is (= body1 (get-in actual-tree [:children 0 :children 0 :bodies 0])))
+      (is (= body1 (get-in actual-tree [:children 0 :children 0 :bodies])))
       (is (false? (get-in actual-tree [:leaf])))
       (is (true? (get-in actual-tree [:children 0 :children 0 :leaf])))
-      (is (= 1 (count (get-in actual-tree [:children 0 :children 0 :bodies]))))
-      (is (= [body2] (get-in actual-tree [:children 0 :children 1 :bodies])))
-      (is (= [body3] (get-in actual-tree [:children 1 :bodies])))
+      (is (= body2 (get-in actual-tree [:children 0 :children 1 :bodies])))
+      (is (= body3 (get-in actual-tree [:children 1 :bodies])))
       (is (= 10 (get-in actual-tree [:mass]))))
     (testing "tree clustering"
       (is (= body3 (last clustered-tree)))

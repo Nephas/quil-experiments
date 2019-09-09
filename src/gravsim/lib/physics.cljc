@@ -12,7 +12,7 @@
               (t/sub (:pos body) pos))))
 
 (defn gravacc-at-pos "pos [AU]" [pos n-bodies]
-  (let [n-bodies-acc (map #(gravity-acc % pos 1e-03) n-bodies)
+  (let [n-bodies-acc (map #(gravity-acc % pos 1e-05) n-bodies)
         halo-acc (gravity-acc HALO pos 100000)]
     (reduce t/add (conj n-bodies-acc halo-acc))))
 
@@ -30,7 +30,7 @@
 (defn get-gravitating-bodies [body quadtree]
   (let [not-self? (fn [other] (not= (:id body) (:id other)))
         n-bodies (quad/get-clustered (:pos body) quadtree)]
-    (filter not-self? (flatten n-bodies))))
+    (filterv not-self? (flatten n-bodies))))
 
 (defn update-body [body dt quadtree]
   (let [n-bodies (get-gravitating-bodies body quadtree)]

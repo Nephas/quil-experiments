@@ -46,22 +46,24 @@
         node {:rect    rect
               :pos     center
               :mass    mass
-              :density density}]
+              :density density
+              :leaf    true}]
 
     (cond (zero? num) nil
           (= num 1) (-> node
-                        (assoc :bodies bodies)
+                        (assoc :bodies (first bodies))
                         (assoc :leaf true))
           true (let [grouped (group-by-quad center bodies)
-                     children (filterv some? (mapv (fn [dir group] (quadtree-node (slice rect center dir) group))
-                                   [0 1 2 3] grouped))]
+                     children (mapv (fn [dir group] (quadtree-node (slice rect center dir) group))
+                                    [0 1 2 3] grouped)]
                  (-> node
-                     (assoc :children children)
+                     (assoc :children (filterv some? children))
                      (assoc :leaf false))))))
 
 (defn get-clustered [pos node]
   (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-dist pos (:pos node)))
         far-node? (< dist-par THRESHOLD)]
-    (cond far-node? (select-keys node [:pos :mass])
-          (:leaf node) (:bodies node)
-          true (map #(get-clustered pos %) (:children node)))))
+    (cond
+      (:leaf node) (:bodies node)
+      far-node? (select-keys node [:pos :mass])
+      true (mapv #(get-clustered pos %) (:children node)))))
