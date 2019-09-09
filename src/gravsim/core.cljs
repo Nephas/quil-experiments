@@ -1,6 +1,5 @@
 (ns gravsim.core
-  (:gen-class)
-  (:require [quil.core :as q]
+  (:require [quil.core :as q :include-macros true]
             [quil.middleware :as m]
             [gravsim.lib.rand :as r]
             [gravsim.lib.quad :as quad]
@@ -9,28 +8,29 @@
 (def SCREEN [1200 900])
 (def SCREENRECT [0 0 (first SCREEN) (last SCREEN)])
 
-(def bodies (for [_ (range 500)]
-              {:pos  [(* (first SCREEN) (r/uniform 0.4 0.6)) (* (second SCREEN) (r/uniform 0.4 0.6))]
-               :vel  [(r/uniform -0.1 0.0) (r/uniform -0.1 0.0)]
+(def bodies (for [_ (range 1000)]
+              {:pos  [(* (first SCREEN) (r/uniform 0.1 0.5)) (* (second SCREEN) (r/uniform 0.1 0.5))]
+               :vel  [(r/uniform -0.1 -0.15) (r/uniform 0 0.05)]
                :mass (r/rand-n 10 100)
                :id   (r/rand-n 4096)}))
+
+(def store (atom {:bodies   bodies
+                  :quadtree (quad/quadtree-node SCREENRECT bodies)}))
 
 (defn setup []
   (q/frame-rate 30)
   (q/color-mode :hsb)
   (apply q/background [20 20 70])
   ; return initial-state
-  {:bodies    bodies
-   :quadtree  (quad/quadtree-node SCREENRECT bodies)
-   :show-tree false})
+  @store)
 
 (defn update-state [state]
   (let [on-screen? (fn [body] (let [[x y] (:pos body)] (and (< 0 x (first SCREEN)) (< 0 y (second SCREEN)))))
-        bodies (filter on-screen? (doall (p/update-physics 1 (:bodies state) (:quadtree state))))
+        bodies (filter on-screen? (doall (p/update-physics (:bodies state) (:quadtree state))))
         quadtree (doall (quad/quadtree-node SCREENRECT bodies))]
-    (-> state
-        (assoc :bodies bodies)
-        (assoc :quadtree quadtree))))
+    (reset! store (-> state
+                      (assoc :bodies bodies)
+                      (assoc :quadtree quadtree)))))
 
 (defn draw-circle [[x y] radius]
   (q/ellipse x y radius radius))
@@ -55,29 +55,19 @@
     (draw-circle (:pos body) (Math/sqrt (* 0.1 (:mass body))))))
 
 (defn draw-state [state]
-  (apply q/background [160 100 0])
-  (when (:show-tree state)
-    (draw-quadtree (:quadtree state)))
+  (apply q/background [160 20 60])
+  (draw-quadtree (:quadtree state))
   (draw-bodies (:bodies state))
   (q/text-num (q/current-frame-rate) 40 40))
 
-(defn handle-click [state event]
-  (if (= :left (:button event))
-    (update state :show-tree not)
-    state))
+(q/defsketch -main
+             :title "gravsim"
+             :size SCREEN
+             :host "canvas"
 
-(defn -main [& args]
-  (q/defsketch -main
-               :title "gravsim"
-               :size SCREEN
-               :renderer :java2d
+             :setup setup
+             :update update-state
+             :draw draw-state
 
-               :setup setup
-               :update update-state
-               :draw draw-state
-               :mouse-clicked handle-click
-
-               ;:features [:present]
-               :bgcolor "#111122"
-
-               :middleware [m/fun-mode]))
+             :features []
+             :middleware [m/fun-mode])

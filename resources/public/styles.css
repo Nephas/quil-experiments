@@ -1,0 +1,42 @@
+body {
+  background-color: black;
+  font-family: "Ubuntu Light", helvetica, sans-serif;
+  color: white
+}
+
+h2 {
+  color: gray;
+}
+
+#canvas-container {
+    width: 100%;
+    text-align:center;
+
+    canvas {
+       display: inline;
+    }
+}
+
+#instructions-container{
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+
+}
+
+table{
+    text-align: left
+}
+
+.col1{
+    color: silver
+}
+
+#instructions{
+    text-align:center;
+    width: 20%;
+}
+
+.spacer{
+    width: 40%;
+}

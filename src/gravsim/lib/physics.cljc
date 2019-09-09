@@ -1,6 +1,6 @@
-(ns gravsim.physics
-  (:require [gravsim.trafo :as t]
-            [gravsim.quad :as quad]))
+(ns gravsim.lib.physics
+  (:require [gravsim.lib.trafo :as t]
+            [gravsim.lib.quad :as quad]))
 
 
 (def G "AU3/Msol'd2" 2.976235E-4)
@@ -13,7 +13,7 @@
 
 (defn gravacc-at-pos "pos [AU]" [pos n-bodies]
   (let [n-bodies-acc (map #(gravity-acc % pos 1e-03) n-bodies)
-        halo-acc (gravity-acc HALO pos 100)]
+        halo-acc (gravity-acc HALO pos 100000)]
     (reduce t/add (conj n-bodies-acc halo-acc))))
 
 (defn move-in-potential [body dt n-bodies]
@@ -23,20 +23,19 @@
         interacc (gravacc-at-pos pos n-bodies)
         vel (t/add (t/scalar dt interacc) intervel)]
     (-> body
-        (assoc-in [:acc] acc)
-        (assoc-in [:vel] vel)
-        (assoc-in [:pos] pos))))
+        (assoc :acc acc)
+        (assoc :vel vel)
+        (assoc :pos pos))))
 
 (defn get-gravitating-bodies [body quadtree]
   (let [not-self? (fn [other] (not= (:id body) (:id other)))
-        n-bodies (filter not-self? (quad/get-clustered (:pos body) quadtree))]
-    n-bodies))
+        n-bodies (quad/get-clustered (:pos body) quadtree)]
+    (filter not-self? n-bodies)))
 
 (defn update-body [body dt quadtree]
   (let [n-bodies (get-gravitating-bodies body quadtree)]
     (move-in-potential body dt n-bodies)))
 
-(defn update-physics [bodies quadtree]
-  (let [dt 0.5]
-    (map #(update-body % dt quadtree) bodies)))
+(defn update-physics [dt bodies quadtree]
+    (pmap #(update-body % dt quadtree) bodies))
 

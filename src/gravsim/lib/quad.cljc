@@ -1,5 +1,5 @@
-(ns gravsim.quad
-  (:require [gravsim.trafo :as t]))
+(ns gravsim.lib.quad
+  (:require [gravsim.lib.trafo :as t]))
 
 (def X 0)
 (def Y 1)
@@ -7,7 +7,6 @@
 (def WIDTH 2)
 (def HEIGHT 3)
 
-(def TREECUTOFF 5)
 (def THRESHOLD 1.5)
 
 (defn half-width [rect] (* 0.5 (get rect WIDTH)))
@@ -47,21 +46,23 @@
         node {:rect    rect
               :pos     center
               :mass    mass
-              :density density}]
+              :density density
+              :leaf    false}]
 
-    (if (<= num TREECUTOFF) (-> node
-                                (assoc :bodies bodies)
-                                (assoc :leaf true))
-                            (let [grouped (group-by-quad center bodies)
-                                  children (map (fn [dir group] (quadtree-node (slice rect center dir) group))
-                                                [0 1 2 3] grouped)]
-                              (-> node
-                                  (assoc :children children)
-                                  (assoc :leaf false))))))
+    (cond (zero? num) nil
+          (= num 1) (-> node
+                        (assoc :body (first bodies))
+                        (assoc :leaf true))
+          true (let [grouped (group-by-quad center bodies)
+                     children (filter some? (map (fn [dir group] (doall (quadtree-node (slice rect center dir) group)))
+                                                 [0 1 2 3] grouped))]
+                 (-> node
+                     (assoc :children children)
+                     (assoc :leaf false))))))
 
 (defn get-clustered [pos node]
-  (let [dist-par (/ (get (:rect node) WIDTH) (t/v-dist pos (:pos node)))
+  (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-mandist pos (:pos node)))
         far-node? (< dist-par THRESHOLD)]
     (cond far-node? (select-keys node [:pos :mass])
-          (:leaf node) (flatten (map #(get-clustered pos %) (:children node)))
-          true (:bodies node))))
+          (not (:leaf node)) (flatten (map #(get-clustered pos %) (:children node)))
+          true (:body node))))
