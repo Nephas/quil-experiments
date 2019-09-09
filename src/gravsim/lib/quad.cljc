@@ -63,7 +63,6 @@
 (defn get-clustered [pos node]
   (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-dist pos (:pos node)))
         far-node? (< dist-par THRESHOLD)]
-    (cond
-      (:leaf node) (:bodies node)
-      far-node? (select-keys node [:pos :mass])
-      true (mapv #(get-clustered pos %) (:children node)))))
+    (cond (:leaf node) (:bodies node)
+          far-node? (select-keys node [:pos :mass])
+          true (mapv #(get-clustered pos %) (:children node)))))
