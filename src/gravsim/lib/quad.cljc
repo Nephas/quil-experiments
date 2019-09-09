@@ -7,7 +7,7 @@
 (def WIDTH 2)
 (def HEIGHT 3)
 
-(def THRESHOLD 1.5)
+(def THRESHOLD 1)
 
 (defn half-width [rect] (* 0.5 (get rect WIDTH)))
 (defn half-height [rect] (* 0.5 (get rect HEIGHT)))
@@ -46,23 +46,22 @@
         node {:rect    rect
               :pos     center
               :mass    mass
-              :density density
-              :leaf    false}]
+              :density density}]
 
     (cond (zero? num) nil
           (= num 1) (-> node
-                        (assoc :body (first bodies))
+                        (assoc :bodies bodies)
                         (assoc :leaf true))
           true (let [grouped (group-by-quad center bodies)
-                     children (filter some? (map (fn [dir group] (doall (quadtree-node (slice rect center dir) group)))
-                                                 [0 1 2 3] grouped))]
+                     children (filterv some? (mapv (fn [dir group] (quadtree-node (slice rect center dir) group))
+                                   [0 1 2 3] grouped))]
                  (-> node
                      (assoc :children children)
                      (assoc :leaf false))))))
 
 (defn get-clustered [pos node]
-  (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-mandist pos (:pos node)))
+  (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-dist pos (:pos node)))
         far-node? (< dist-par THRESHOLD)]
     (cond far-node? (select-keys node [:pos :mass])
-          (not (:leaf node)) (flatten (map #(get-clustered pos %) (:children node)))
-          true (:body node))))
+          (:leaf node) (:bodies node)
+          true (map #(get-clustered pos %) (:children node)))))

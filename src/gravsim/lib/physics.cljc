@@ -30,7 +30,7 @@
 (defn get-gravitating-bodies [body quadtree]
   (let [not-self? (fn [other] (not= (:id body) (:id other)))
         n-bodies (quad/get-clustered (:pos body) quadtree)]
-    (filter not-self? n-bodies)))
+    (filter not-self? (flatten n-bodies))))
 
 (defn update-body [body dt quadtree]
   (let [n-bodies (get-gravitating-bodies body quadtree)]

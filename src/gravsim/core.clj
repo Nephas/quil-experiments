@@ -9,9 +9,9 @@
 (def SCREEN [1200 900])
 (def SCREENRECT [0 0 (first SCREEN) (last SCREEN)])
 
-(def bodies (for [_ (range 500)]
+(def bodies (for [_ (range 250)]
               {:pos  [(* (first SCREEN) (r/uniform 0.4 0.6)) (* (second SCREEN) (r/uniform 0.4 0.6))]
-               :vel  [(r/uniform -0.1 0.0) (r/uniform -0.1 0.0)]
+               :vel  [(r/uniform -0.1 0.1) (r/uniform -0.1 0.1)]
                :mass (r/rand-n 10 100)
                :id   (r/rand-n 4096)}))
 
@@ -36,7 +36,7 @@
   (q/ellipse x y radius radius))
 
 (defn draw-node [node]
-  (when (and (some? node) (seq (:children node)))
+  (when (some? node)
     (q/fill 160 100 (* 100 (:density node)))
     (apply q/rect (:rect node))
     (doseq [child (:children node)]
