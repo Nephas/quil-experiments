@@ -10,8 +10,8 @@
 (def SCREEN [1200 900])
 (def SCREENRECT [0 0 (first SCREEN) (last SCREEN)])
 
-(def bodies (for [_ (range 250)]
-              {:pos  (mat/array [(* (first SCREEN) (r/uniform 0.3 0.7)) (* (second SCREEN) (r/uniform 0.3 0.7))])
+(def bodies (for [_ (range 1000)]
+              {:pos  [(* (first SCREEN) (r/uniform 0.3 0.7)) (* (second SCREEN) (r/uniform 0.3 0.7))]
                :vel  [(r/uniform -0.1 0.1) (r/uniform -0.1 0.1)]
                :mass (r/rand-n 10 100)
                :id   (r/rand-n 4096)}))

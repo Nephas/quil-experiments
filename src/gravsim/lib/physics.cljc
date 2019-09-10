@@ -12,9 +12,9 @@
               (t/sub (:pos body) pos))))
 
 (defn gravacc-at-pos "pos [AU]" [pos n-bodies]
-  (let [n-bodies-acc (map #(gravity-acc % pos 1e-05) n-bodies)
-        halo-acc (gravity-acc HALO pos 100000)]
-    (reduce t/add (conj n-bodies-acc halo-acc))))
+  (let [halo-acc (gravity-acc HALO pos 100000)
+        gravity-reducer (fn [acc next-body] (t/add acc (gravity-acc next-body pos 1e-05)))]
+    (reduce gravity-reducer halo-acc n-bodies)))
 
 (defn move-in-potential [body dt potential]
   (let [acc (potential (:pos body))
