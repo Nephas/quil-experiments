@@ -3,7 +3,6 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [gravsim.lib.rand :as r]
-            [clojure.core.matrix :as mat]
             [gravsim.lib.quad :as quad]
             [gravsim.lib.physics :as p]))
 

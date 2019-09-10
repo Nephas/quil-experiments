@@ -38,6 +38,19 @@
                                    west? (recur (rest remaining) nw ne (conj sw body) se)
                                    north? (recur (rest remaining) nw (conj ne body) sw se))))))
 
+
+
+(defn get-center-of-mass [body1 body2]
+  (let [{pos1  :pos
+         mass1 :mass} body1
+        {pos2  :pos
+         mass2 :mass} body2
+        mass (+ mass1 mass2)
+        x (/ (+ (* (first pos1) mass1) (* (first pos2) mass2)) mass)
+        y (/ (+ (* (last pos1) mass1) (* (last pos2) mass2)) mass)]
+    {:pos  [x y]
+     :mass mass}))
+
 (defn quadtree-node [rect bodies]
   (let [mass (apply + (map #(:mass %) bodies))
         center (center rect)
@@ -48,24 +61,25 @@
               :mass    mass
               :density density
               :leaf    true}]
-
     (cond (zero? num) nil
           (= num 1) (-> node
                         (assoc :bodies (first bodies))
+                        (assoc :pos (:pos (first bodies)))
                         (assoc :leaf true))
           true (let [grouped (group-by-quad center bodies)
                      children (mapv (fn [dir group] (quadtree-node (slice rect center dir) group))
                                     [0 1 2 3] grouped)]
                  (-> node
+                     (assoc :pos (:pos (reduce get-center-of-mass bodies)))
                      (assoc :children (filterv some? children))
                      (assoc :leaf false))))))
 
 (defn get-clustered [pos id node]
-  (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-dist pos (:pos node)))
-        far-node? (< dist-par THRESHOLD)
+  (let [
+        far-node? (fn [node] (< (/ (get-in node [:rect WIDTH]) (t/v-dist pos (:pos node))) THRESHOLD))
         self? (fn [body] (= id (body :id)))]
     (cond (:leaf node) (let [body (:bodies node)]
                          (if (self? body) [] body))
-          far-node? {:pos  (:pos node)
-                     :mass (:mass node)}
+          (far-node? node) {:pos  (:pos node)
+                            :mass (:mass node)}
           true (map #(get-clustered pos id %) (:children node)))))

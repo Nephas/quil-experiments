@@ -26,8 +26,11 @@
         clustered-tree (flatten (q/get-clustered [9 4] 4 actual-tree))]
     (testing "tree construction"
       (is (= body1 (get-in actual-tree [:children 0 :children 0 :bodies])))
+      (is (= (:pos body1) (get-in actual-tree [:children 0 :children 0 :pos])))
+      (is (= (q/get-center-of-mass body1 body2) (get-in actual-tree [:children 0 :pos])))
       (is (false? (get-in actual-tree [:leaf])))
       (is (true? (get-in actual-tree [:children 0 :children 0 :leaf])))
+      (is (nil? (get-in actual-tree [:children 2])))
       (is (= body2 (get-in actual-tree [:children 0 :children 1 :bodies])))
       (is (= body3 (get-in actual-tree [:children 1 :bodies])))
       (is (= 10 (get-in actual-tree [:mass]))))
