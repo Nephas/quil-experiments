@@ -3,14 +3,15 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [gravsim.lib.rand :as r]
+            [clojure.core.matrix :as mat]
             [gravsim.lib.quad :as quad]
             [gravsim.lib.physics :as p]))
 
 (def SCREEN [1200 900])
 (def SCREENRECT [0 0 (first SCREEN) (last SCREEN)])
 
-(def bodies (for [_ (range 500)]
-              {:pos  [(* (first SCREEN) (r/uniform 0.4 0.6)) (* (second SCREEN) (r/uniform 0.4 0.6))]
+(def bodies (for [_ (range 250)]
+              {:pos  (mat/array [(* (first SCREEN) (r/uniform 0.3 0.7)) (* (second SCREEN) (r/uniform 0.3 0.7))])
                :vel  [(r/uniform -0.1 0.1) (r/uniform -0.1 0.1)]
                :mass (r/rand-n 10 100)
                :id   (r/rand-n 4096)}))
@@ -20,14 +21,15 @@
   (q/color-mode :hsb)
   (apply q/background [20 20 70])
   ; return initial-state
-  {:bodies    bodies
-   :quadtree  (quad/quadtree-node SCREENRECT bodies)
-   :show-tree false})
+  {:bodies            bodies
+   :quadtree          (quad/quadtree-node SCREENRECT bodies)
+   :show-tree         false
+   :show-trajectories false})
 
 (defn update-state [state]
   (let [on-screen? (fn [body] (let [[x y] (:pos body)] (and (< 0 x (first SCREEN)) (< 0 y (second SCREEN)))))
-        bodies (filter on-screen? (doall (p/update-physics 1 (:bodies state) (:quadtree state))))
-        quadtree (doall (quad/quadtree-node SCREENRECT bodies))]
+        bodies (filter on-screen? (p/update-physics 0.5 (:bodies state) (:quadtree state)))
+        quadtree (quad/quadtree-node SCREENRECT bodies)]
     (-> state
         (assoc :bodies bodies)
         (assoc :quadtree quadtree))))
@@ -48,23 +50,31 @@
   (q/no-fill)
   (draw-node node))
 
-(defn draw-bodies [bodies]
+(defn draw-bodies [bodies trajectories?]
   (q/fill 255 0 255)
   (q/no-stroke)
   (doseq [body bodies]
-    (draw-circle (:pos body) (Math/sqrt (* 0.1 (:mass body))))))
+    (let [radius (if trajectories? 0.5 (Math/sqrt (* 0.1 (:mass body))))]
+      (draw-circle (:pos body) radius))))
 
 (defn draw-state [state]
-  (apply q/background [160 100 0])
+  (when (not (:show-trajectories state))
+    (apply q/background [160 100 0]))
   (when (:show-tree state)
     (draw-quadtree (:quadtree state)))
-  (draw-bodies (:bodies state))
+  (draw-bodies (:bodies state) (:show-trajectories state))
   (q/text-num (q/current-frame-rate) 40 40))
 
 (defn handle-click [state event]
-  (if (= :left (:button event))
-    (update state :show-tree not)
-    state))
+  (apply q/background [160 100 0])
+  (cond
+    (= :left (:button event)) (-> state
+                                  (update :show-tree not)
+                                  (assoc :show-trajectories false))
+    (= :right (:button event)) (-> state
+                                   (update :show-trajectories not)
+                                   (assoc :show-tree false))
+    true state))
 
 (defn -main [& args]
   (q/defsketch -main

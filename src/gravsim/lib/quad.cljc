@@ -7,7 +7,7 @@
 (def WIDTH 2)
 (def HEIGHT 3)
 
-(def THRESHOLD 1)
+(def THRESHOLD 1.5)
 
 (defn half-width [rect] (* 0.5 (get rect WIDTH)))
 (defn half-height [rect] (* 0.5 (get rect HEIGHT)))
@@ -60,9 +60,12 @@
                      (assoc :children (filterv some? children))
                      (assoc :leaf false))))))
 
-(defn get-clustered [pos node]
+(defn get-clustered [pos id node]
   (let [dist-par (/ (get-in node [:rect WIDTH]) (t/v-dist pos (:pos node)))
-        far-node? (< dist-par THRESHOLD)]
-    (cond (:leaf node) (:bodies node)
-          far-node? (select-keys node [:pos :mass])
-          true (mapv #(get-clustered pos %) (:children node)))))
+        far-node? (< dist-par THRESHOLD)
+        self? (fn [body] (= id (body :id)))]
+    (cond (:leaf node) (let [body (:bodies node)]
+                         (if (self? body) [] body))
+          far-node? {:pos  (:pos node)
+                     :mass (:mass node)}
+          true (map #(get-clustered pos id %) (:children node)))))

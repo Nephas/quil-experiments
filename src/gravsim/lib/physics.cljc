@@ -16,26 +16,25 @@
         halo-acc (gravity-acc HALO pos 100000)]
     (reduce t/add (conj n-bodies-acc halo-acc))))
 
-(defn move-in-potential [body dt n-bodies]
-  (let [acc (gravacc-at-pos (:pos body) n-bodies)
-        intervel (t/add (t/scalar (* 0.5 dt) acc) (:vel body))
-        pos (t/add (t/scalar dt intervel) (:pos body))
-        interacc (gravacc-at-pos pos n-bodies)
-        vel (t/add (t/scalar dt interacc) intervel)]
+(defn move-in-potential [body dt potential]
+  (let [acc (potential (:pos body))
+        intervel (t/interpolate (* 0.5 dt) acc (:vel body))
+        pos (t/interpolate dt intervel (:pos body))
+        interacc (potential pos)
+        vel (t/interpolate dt interacc intervel)]
     (-> body
-        (assoc :acc acc)
         (assoc :vel vel)
         (assoc :pos pos))))
 
 (defn get-gravitating-bodies [body quadtree]
-  (let [not-self? (fn [other] (not= (:id body) (:id other)))
-        n-bodies (quad/get-clustered (:pos body) quadtree)]
-    (filterv not-self? (flatten n-bodies))))
+  (let [n-bodies (quad/get-clustered (:pos body) (:id body) quadtree)]
+    (flatten n-bodies)))
 
 (defn update-body [body dt quadtree]
-  (let [n-bodies (get-gravitating-bodies body quadtree)]
-    (move-in-potential body dt n-bodies)))
+  (let [n-bodies (get-gravitating-bodies body quadtree)
+        potential (fn [pos] (gravacc-at-pos pos n-bodies))]
+    (move-in-potential body dt potential)))
 
 (defn update-physics [dt bodies quadtree]
-    (pmap #(update-body % dt quadtree) bodies))
+  (pmap #(update-body % dt quadtree) bodies))
 

@@ -23,7 +23,7 @@
         rect [0 0 10 10]
         bodies [body1 body2 body3]
         actual-tree (q/quadtree-node rect bodies)
-        clustered-tree (flatten (q/get-clustered [9 4] actual-tree))]
+        clustered-tree (flatten (q/get-clustered [9 4] 4 actual-tree))]
     (testing "tree construction"
       (is (= body1 (get-in actual-tree [:children 0 :children 0 :bodies])))
       (is (false? (get-in actual-tree [:leaf])))
