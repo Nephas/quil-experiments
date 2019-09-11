@@ -26,13 +26,9 @@
         (assoc :vel vel)
         (assoc :pos pos))))
 
-(defn get-gravitating-bodies [body quadtree]
-  (let [n-bodies (quad/get-clustered (:pos body) (:id body) quadtree)]
-    (flatten n-bodies)))
-
 (defn update-body [body dt quadtree]
-  (let [n-bodies (get-gravitating-bodies body quadtree)
-        potential (fn [pos] (gravacc-at-pos pos n-bodies))]
+  (let [gravitating-bodies (quad/get-clustered (:pos body) (:id body) quadtree)
+        potential (fn [pos] (gravacc-at-pos pos gravitating-bodies))]
     (move-in-potential body dt potential)))
 
 (defn update-physics [dt bodies quadtree]

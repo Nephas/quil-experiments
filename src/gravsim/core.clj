@@ -38,10 +38,11 @@
 
 (defn draw-node [node]
   (when (some? node)
-    (q/fill 160 100 (* 100 (:density node)))
+    (q/fill 160 100 (* 100 (quad/density node)))
     (apply q/rect (:rect node))
-    (doseq [child (:children node)]
-      (draw-node child))))
+    (when (not (:leaf node))
+      (doseq [child (:children node)]
+        (draw-node child)))))
 
 (defn draw-quadtree [node]
   (q/stroke-weight 1)

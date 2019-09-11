@@ -14,7 +14,7 @@
           body3 {:pos [6 6]}
           body4 {:pos [8 1]}
           bodies [body1 body2 body3 body4]]
-      (is (= (q/group-by-quad [5 4] bodies) [[body1 body2] [body4] [] [body3]])))))
+      (is (= (q/group-by-quadrant [5 4] bodies) [[body1 body2] [body4] [] [body3]])))))
 
 (deftest quadtree
   (let [body1 {:pos [1 2] :mass 2 :id 1}
