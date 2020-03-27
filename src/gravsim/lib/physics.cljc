@@ -4,7 +4,7 @@
 
 
 (def G "AU3/Msol'd2" 2.976235E-4)
-(def HALO {:mass 100000 :pos [600 450]})
+(def HALO {:mass 100000 :pos [400 400]})
 
 (defn gravity-acc [body pos dampen]
   (let [inv-dist #(/ 1 (+ dampen (Math/pow (t/v-dist %1 %2) 3)))]
@@ -32,5 +32,5 @@
     (move-in-potential body dt potential)))
 
 (defn update-physics [dt bodies quadtree]
-  (pmap #(update-body % dt quadtree) bodies))
+  (map #(update-body % dt quadtree) bodies))
 

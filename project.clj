@@ -25,13 +25,14 @@
   :uberjar-name "gravsim-standalone.jar"
 
   ;===== WEBAPP =====;
+  :hooks [leiningen.cljsbuild]
   :clean-targets ^{:protect false} ["resources/public/js"]
   :cljsbuild {:builds [{:id           "optimized"
                         :source-paths ["src"]
                         :compiler     {:main          "gravsim.core"
-                                       :output-to     "resources/public/js/main.js"
-                                       :output-dir    "resources/public/js/optimized"
-                                       :asset-path    "js/optimized"
+                                       :output-to     "resources/main.js"
+                                       :output-dir    "resources/optimized"
+                                       :asset-path    "optimized"
                                        :optimizations :advanced}}]}
 
   ;===== LOCAL-JARS =====;

@@ -6,13 +6,13 @@
             [gravsim.lib.quad :as quad]
             [gravsim.lib.physics :as p]))
 
-(def SCREEN [1200 900])
+(def SCREEN [800 800])
 (def SCREENRECT [0 0 (first SCREEN) (last SCREEN)])
 
-(def bodies (for [_ (range 1000)]
+(def bodies (for [_ (range 500)]
               {:pos  [(* (first SCREEN) (r/uniform 0.3 0.7)) (* (second SCREEN) (r/uniform 0.3 0.7))]
                :vel  [(r/uniform -0.1 0.1) (r/uniform -0.1 0.1)]
-               :mass (r/rand-n 10 100)
+               :mass (r/rand-n 10 50)
                :id   (r/rand-n 4096)}))
 
 (defn setup []

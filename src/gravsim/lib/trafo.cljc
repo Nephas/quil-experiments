@@ -3,24 +3,20 @@
 (def inv #(/ 1 %))
 
 (defn interpolate [a x1 x2]
-  (vector-of :double
-             (+ (* a (get x1 0)) (get x2 0))
-             (+ (* a (get x1 1)) (get x2 1))))
+  [(+ (* a (get x1 0)) (get x2 0))
+   (+ (* a (get x1 1)) (get x2 1))])
 
 (defn add [x1 x2]
-  (vector-of :double
-             (+ (get x1 0) (get x2 0))
-             (+ (get x1 1) (get x2 1))))
+  [(+ (get x1 0) (get x2 0))
+   (+ (get x1 1) (get x2 1))])
 
 (defn sub [x1 x2]
-  (vector-of :double
-             (- (get x1 0) (get x2 0))
-             (- (get x1 1) (get x2 1))))
+  [(- (get x1 0) (get x2 0))
+   (- (get x1 1) (get x2 1))])
 
 (defn scalar [num v]
-  (vector-of :double
-             (* num (get v 0))
-             (* num (get v 1))))
+  [(* num (get v 0))
+   (* num (get v 1))])
 
 (def neg #(scalar -1 %))
 
