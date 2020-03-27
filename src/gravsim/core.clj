@@ -10,11 +10,11 @@
 (def SCREEN [800 800])
 (def SCREENRECT [0 0 (first SCREEN) (last SCREEN)])
 
-(def bodies (for [_ (range 500)]
+(def bodies (for [id (range 250)]
               {:pos  [(* (first SCREEN) (r/uniform 0.3 0.7)) (* (second SCREEN) (r/uniform 0.3 0.7))]
                :vel  [(r/uniform -0.1 0.1) (r/uniform -0.1 0.1)]
                :mass (r/rand-n 10 50)
-               :id   (r/rand-n 4096)}))
+               :id   id}))
 
 (defn setup []
   (q/frame-rate 30)
@@ -40,7 +40,7 @@
   (when (:show-tree state)
     (d/draw-quadtree (:quadtree state)))
   (d/draw-bodies (:bodies state) (:show-trajectories state))
-  (q/text (str "FPS: " (q/current-frame-rate)) 40 40)
+  (q/text (str "FPS: " (int (q/current-frame-rate))) 40 40)
   (q/text (str "Bodies: " (count (:bodies state))) 40 80))
 
 (defn handle-click [state event]
