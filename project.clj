@@ -26,11 +26,11 @@
 
   ;===== WEBAPP =====;
   :hooks [leiningen.cljsbuild]
-  :clean-targets ^{:protect false} ["resources/public/js"]
+  :clean-targets ^{:protect false} ["resources/src/main.js"]
   :cljsbuild {:builds [{:id           "optimized"
                         :source-paths ["src"]
                         :compiler     {:main          "gravsim.core"
-                                       :output-to     "resources/main.js"
+                                       :output-to     "resources/src/main.js"
                                        :output-dir    "resources/optimized"
                                        :asset-path    "optimized"
                                        :optimizations :advanced}}]}
