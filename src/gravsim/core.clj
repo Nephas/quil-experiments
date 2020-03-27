@@ -3,6 +3,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [gravsim.lib.rand :as r]
+            [gravsim.lib.draw :as d]
             [gravsim.lib.quad :as quad]
             [gravsim.lib.physics :as p]))
 
@@ -33,37 +34,14 @@
         (assoc :bodies bodies)
         (assoc :quadtree quadtree))))
 
-(defn draw-circle [[x y] radius]
-  (q/ellipse x y radius radius))
-
-(defn draw-node [node]
-  (when (some? node)
-    (q/fill 160 100 (* 100 (quad/density node)))
-    (apply q/rect (:rect node))
-    (when (not (:leaf node))
-      (doseq [child (:children node)]
-        (draw-node child)))))
-
-(defn draw-quadtree [node]
-  (q/stroke-weight 1)
-  (q/stroke 160 60 160)
-  (q/no-fill)
-  (draw-node node))
-
-(defn draw-bodies [bodies trajectories?]
-  (q/fill 255 0 255)
-  (q/no-stroke)
-  (doseq [body bodies]
-    (let [radius (if trajectories? 0.5 (Math/sqrt (* 0.1 (:mass body))))]
-      (draw-circle (:pos body) radius))))
-
 (defn draw-state [state]
   (when (not (:show-trajectories state))
     (apply q/background [160 100 0]))
   (when (:show-tree state)
-    (draw-quadtree (:quadtree state)))
-  (draw-bodies (:bodies state) (:show-trajectories state))
-  (q/text-num (q/current-frame-rate) 40 40))
+    (d/draw-quadtree (:quadtree state)))
+  (d/draw-bodies (:bodies state) (:show-trajectories state))
+  (q/text (str "FPS: " (q/current-frame-rate)) 40 40)
+  (q/text (str "Bodies: " (count (:bodies state))) 40 80))
 
 (defn handle-click [state event]
   (apply q/background [160 100 0])

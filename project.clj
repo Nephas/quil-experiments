@@ -39,8 +39,4 @@
   :profiles {:corejar   {:main         gravsim.core
                          :uberjar-name "gravsim-standalone.jar"
                          :aot          :all
-                         :auto-clean   false}
-
-             :serverjar {:main         server.core
-                         :uberjar-name "server-standalone.jar"
-                         :aot          :all}})
+                         :auto-clean   false}})
