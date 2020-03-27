@@ -25,12 +25,13 @@
   @store)
 
 (defn update-state [state]
-  (let [on-screen? (fn [body] (let [[x y] (:pos body)] (and (< 0 x (first SCREEN)) (< 0 y (second SCREEN)))))
+  (if (even? (q/frame-count)) state
+    (let [on-screen? (fn [body] (let [[x y] (:pos body)] (and (< 0 x (first SCREEN)) (< 0 y (second SCREEN)))))
         bodies (filter on-screen? (doall (p/update-physics 0.5 (:bodies state) (:quadtree state))))
         quadtree (doall (quad/quadtree-node SCREENRECT bodies))]
     (reset! store (-> state
                       (assoc :bodies bodies)
-                      (assoc :quadtree quadtree)))))
+                      (assoc :quadtree quadtree))))))
 
 (defn draw-circle [[x y] radius]
   (q/ellipse x y radius radius))
