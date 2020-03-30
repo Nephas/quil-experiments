@@ -27,12 +27,19 @@
   ;===== WEBAPP =====;
   :hooks [leiningen.cljsbuild]
   :clean-targets ^{:protect false} ["resources/src/gravsim.js"]
-  :cljsbuild {:builds [{:id           "optimized"
+  :cljsbuild {:builds [{:id           "dummy"
+                        :source-paths ["src"]
+                        :compiler     {:main          "dummy.core"
+                                       :output-to     "resources/src/dummy.js"
+                                       :output-dir    "resources/optimized/dummy"
+                                       :asset-path    "optimized/dummy"
+                                       :optimizations :advanced}}
+                       {:id           "gravsim"
                         :source-paths ["src"]
                         :compiler     {:main          "gravsim.core"
                                        :output-to     "resources/src/gravsim.js"
-                                       :output-dir    "resources/optimized"
-                                       :asset-path    "optimized"
+                                       :output-dir    "resources/optimized/gravsim"
+                                       :asset-path    "optimized/gravsim"
                                        :optimizations :advanced}}]}
 
   ;===== LOCAL-JARS =====;
