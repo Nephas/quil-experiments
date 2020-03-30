@@ -1,11 +1,11 @@
-(ns dummy.lib.rules
-  (:require [dummy.lib.grid :as g]))
+(ns conway.lib.rules
+  (:require [conway.lib.grid :as g]))
 
-(defn evolve-cell [cell neighbors]
-  (let [neighbor-count (count (filter (fn [n] (:alive n)) neighbors))]
-    (cond (and (:alive cell) (<= 2 neighbor-count 3)) {:alive true}
-          (and (not (:alive cell)) (= neighbor-count 3)) {:alive true}
-          true {:alive false})))
+(defn evolve-cell [alive neighbors]
+  (let [neighbor-count (count (filter true? neighbors))]
+    (cond (and alive (<= 2 neighbor-count 3)) true
+          (and (not alive) (= neighbor-count 3)) true
+          true false)))
 
 (defn evolve-grid [grid]
   (loop [positions (keys grid)

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <title>Marco's Place</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="src/include.js"></script>
+    <script type="text/javascript" src="src/conway.js"></script>
+</head>
+
+<body>
+<div data-include="header.html"></div>
+
+<div id="canvas-container">
+    <canvas id="canvas"></canvas>
+    <script>conway.core.run_sketch()</script>
+</div>
+<br>
+
+<h1>A Game of Life</h1>
+<div id="instructions-container">
+    <div class="spacer"></div>
+    <div class="column" id="instructions">
+        <ul>
+            <li>LMB: Flip Cell</li>
+            <li>MMB: Pause Simulation</li>
+            <li>RMB: Flip Multiple Cells</li>
+        </ul>
+    </div>
+</div>
+<br>
+
+<img src="clojure.png" alt="powered by clojure" height="42px">
+</body>
+</html>
