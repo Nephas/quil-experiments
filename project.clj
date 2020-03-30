@@ -1,4 +1,4 @@
-(defproject gravsim_clj "0.1.0-SNAPSHOT"
+(defproject quil-experiments "SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -19,14 +19,8 @@
             [lein-figwheel "0.5.15"]
             [environ/environ.lein "0.3.1"]]
 
-  ;===== GAME =====;
-  :main gravsim.core
-  :aot [gravsim.core]
-  :uberjar-name "gravsim-standalone.jar"
-
   ;===== WEBAPP =====;
-  :hooks [leiningen.cljsbuild]
-  :clean-targets ^{:protect false} ["resources/src/gravsim.js"]
+  :clean-targets ^{:protect false} ["resources/src/gravsim.js" "resources/src/conway.js" "target"]
   :cljsbuild {:builds [{:id           "dummy"
                         :source-paths ["src"]
                         :compiler     {:main          "dummy.core"
@@ -50,7 +44,12 @@
                                        :optimizations :advanced}}]}
 
   ;===== LOCAL-JARS =====;
-  :profiles {:corejar   {:main         gravsim.core
-                         :uberjar-name "gravsim-standalone.jar"
-                         :aot          :all
-                         :auto-clean   false}})
+  :profiles {:webapps {:hooks [leiningen.cljsbuild]}
+             :gravsim {:main         gravsim.core
+                       :uberjar-name "gravsim-standalone.jar"
+                       :aot          [gravsim.core]
+                       :auto-clean   false}
+             :conway  {:main         conway.core
+                       :uberjar-name "conway-standalone.jar"
+                       :aot          [conway.core]
+                       :auto-clean   false}})
