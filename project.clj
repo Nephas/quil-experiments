@@ -34,6 +34,13 @@
                                        :output-dir    "resources/optimized/dummy"
                                        :asset-path    "optimized/dummy"
                                        :optimizations :advanced}}
+                       {:id           "conway"
+                        :source-paths ["src"]
+                        :compiler     {:main          "conway.core"
+                                       :output-to     "resources/src/conway.js"
+                                       :output-dir    "resources/optimized/conway"
+                                       :asset-path    "optimized/conway"
+                                       :optimizations :advanced}}
                        {:id           "gravsim"
                         :source-paths ["src"]
                         :compiler     {:main          "gravsim.core"
