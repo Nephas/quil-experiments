@@ -16,4 +16,3 @@
                                  neighbors (vals (select-keys grid (g/get-neighborhood pos)))]
                              (recur (rest positions)
                                     (assoc next pos (evolve-cell old-cell neighbors)))))))
-

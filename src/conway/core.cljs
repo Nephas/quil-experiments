@@ -9,7 +9,7 @@
 
 (def SCREEN [800 800])
 
-(def CELLSIZE 8)
+(def CELLSIZE 10)
 (def MAPSIZE [(int (/ (get-X SCREEN) CELLSIZE)) (int (/ (get-Y SCREEN) CELLSIZE))])
 
 (defn setup []
