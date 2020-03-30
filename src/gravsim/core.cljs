@@ -12,11 +12,8 @@
 (def bodies (for [id (range 250)]
               {:pos  [(* (first SCREEN) (r/uniform 0.3 0.7)) (* (second SCREEN) (r/uniform 0.3 0.7))]
                :vel  [(r/uniform -0.1 0.1) (r/uniform -0.1 0.1)]
-               :mass (r/rand-n 10 50)
+               :mass (r/rand-n 10 100)
                :id   id}))
-
-(def store (atom {:bodies   bodies
-                  :quadtree (quad/quadtree-node SCREENRECT bodies)}))
 
 (defn setup []
   (q/frame-rate 30)
