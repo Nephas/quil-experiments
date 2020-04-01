@@ -1,20 +1,15 @@
-# gravsim
+# quil-experiments
 
-A Quil sketch designed to ... well, that part is up to you.
+Some clj/cljs compilable quil-sketches
 
-## Usage
+For compilation, look at _project.clj_, use the _.sh_ scripts to deploy
 
-compile java runnable:
+[Hosted at this homepage](https://home.tngtech.com/~finkmar/)
 
-`lein with-profile corejar uberjar`
+## gravsim
 
-run with:
+A quad-tree optimized Newtonian N-Body simulation 
 
-`java -jar target/gravsim-standalone.jar `
+## conway
 
-## License
-
-Copyright © 2016 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+An interactive implementation of Conway's game of life
